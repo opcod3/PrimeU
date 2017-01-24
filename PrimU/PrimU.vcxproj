@@ -164,6 +164,7 @@
     <ClInclude Include="executable.h" />
     <ClInclude Include="executor.h" />
     <ClInclude Include="handlers.h" />
+    <ClInclude Include="LCD.h" />
     <ClInclude Include="vprintf.h" />
     <ClInclude Include="interrupt_handle.h" />
     <ClInclude Include="memory.h" />
@@ -175,6 +176,7 @@
     <ClCompile Include="dbgout.cpp" />
     <ClCompile Include="executable.cpp" />
     <ClCompile Include="executor.cpp" />
+    <ClCompile Include="LCD.cpp" />
     <ClCompile Include="memory.cpp" />
     <ClCompile Include="PrimU.cpp" />
     <ClCompile Include="system.cpp" />
