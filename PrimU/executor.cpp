@@ -29,22 +29,15 @@ bool Executor::initialize(Executable* exec)
         if (m_err != UC_ERR_OK) return false;
     }
 
-    Memory* mem = exec->get_mem();
+    __check(exec->Load(), ERROR_OK, false);
 
-    if (!mem)
-        return false;
-
-    callAndcheckError(uc_mem_map_ptr(m_uc, mem->get_offset(), mem->get_size(), UC_PROT_ALL, mem->get_data()));
-    //callAndcheckError(uc_mem_write(m_uc, mem->get_offset(), mem->get_data(), mem->get_size()))
     callAndcheckError(uc_hook_add(m_uc, &m_interrupt_hook, UC_HOOK_INTR, interrupt_hook, this, 0, 1));
 
-    m_stack = new Memory;
-    m_stack->alloc(0x05000000, 0x20000000); //Allocate 256mb of stack
-
-    callAndcheckError(uc_mem_map_ptr(m_uc, m_stack->get_offset(), m_stack->get_size(), UC_PROT_READ | UC_PROT_WRITE, m_stack->get_data()));
+    MemoryBlock* stackBlock;
+    __check(sMemoryManager->StaticAlloc(MEM_STACK, 0x05000000, &stackBlock), ERROR_OK, false);
 
 
-    m_sp = m_stack->get_offset() + m_stack->get_size();
+    m_sp = stackBlock->GetVAddr() + stackBlock->GetSize();
     callAndcheckError(uc_reg_write(m_uc, UC_ARM_REG_SP, &m_sp));
 
 
@@ -807,19 +800,18 @@ void Executor::init_interrupts_()
 void Executor::execute()
 {
     uint32_t ins = 0x0;
-    uint32_t SP0, PC0, SP1, PC1;
+    uint32_t SP0, PC0;
     PC0 = m_exec->get_entry();
-    uc_reg_read(m_uc, UC_ARM_REG_SP, &SP1);
-    SP0 = SP1;
+    uc_reg_read(m_uc, UC_ARM_REG_SP, &SP0);
     printf("Starting execution at 0x%X\n\n", PC0);
     while (m_err == UC_ERR_OK)
     {
         m_err = uc_emu_start(m_uc, PC0, 0, 0, ins);
 
-        uc_reg_read(m_uc, UC_ARM_REG_PC, &PC1);
-        uc_reg_read(m_uc, UC_ARM_REG_SP, &SP1);
+        uc_reg_read(m_uc, UC_ARM_REG_PC, &PC0);
+        uc_reg_read(m_uc, UC_ARM_REG_SP, &SP0);
 
-        printf("Executed 0x%X instructions\n PC: %8X | SP: %8X\n", ins, PC1, SP1);
+        printf("\nExecuted 0x%X instructions\n PC: %8X | SP: %8X\n", ins, PC0, SP0);
 
         //_sleep(100);
 
@@ -828,9 +820,6 @@ void Executor::execute()
         //    printf("Not moving, broke loop\n");
             //break;
         //}
-
-        SP0 = SP1;
-        PC0 = PC1;
     }
     
     if (m_err != UC_ERR_OK) {
@@ -867,7 +856,7 @@ void interrupt_hook(uc_engine *uc, uint64_t address, uint32_t size, void *user_d
         switch (_handle->status) {
         case HANDLE_IMPLEMENTED:
             printf("[%05X] %s() called\n", _handle->id, _handle->name);
-            result = _handle->callback(uc, r0, r1, r2, r3, sp, sExecutor->m_stack, sExecutor->m_exec->get_mem());
+            result = _handle->callback(uc, r0, r1, r2, r3, sp);
             break;
         case HANDLE_NAMEONLY:
             printf("[%05X] %s() UNHANDLED\n", _handle->id, _handle->name);

@@ -5,6 +5,7 @@
 #include  <unicorn/unicorn.h>
 #include "executable.h"
 #include "memory.h"
+#include "MemoryManager.h"
 
 enum InterruptID : uint32_t;
 struct InterruptHandle;
@@ -19,17 +20,15 @@ public:
     bool initialize(Executable* exec);
     void execute();
     uc_err get_last_error() { return m_err; }
+    uc_engine* GetUcInstance() { return m_uc; }
 
     template<typename T>
     T* Executor::get_from_memory(uint32_t addr)
     {
-        if (addr >= m_exec->get_mem()->get_offset() &&
-            addr < m_exec->get_mem()->get_offset() + m_exec->get_mem()->get_size())
-            return m_exec->get_mem()->get<T>(addr);
+        T* ptr;
+        ptr = reinterpret_cast<T*>(sMemoryManager->GetRealAddr(addr));
 
-        if (addr >= m_stack->get_offset() &&
-            addr < m_stack->get_offset() + m_stack->get_size())
-            return m_stack->get<T>(addr);
+        if (ptr != nullptr) return ptr;
 
         if (addr >= m_dynamic->get_offset() &&
             addr < m_dynamic->get_offset() + m_dynamic->get_size())

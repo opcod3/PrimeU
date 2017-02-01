@@ -8,7 +8,7 @@
 
 uint32_t struc = 0;
 
-uint32_t getCurrentDir(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp, Memory* stack, Memory* progmem)
+uint32_t getCurrentDir(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp)
 {
     static char* path = "A:\\WINDOW\\SYSTEM\\";
 
@@ -20,7 +20,7 @@ uint32_t getCurrentDir(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uin
 }
 
 
-uint32_t prgrmIsRunning(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp, Memory* stack, Memory* progmem)
+uint32_t prgrmIsRunning(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp)
 {
     printf("    program: %s\n", sExecutor->get_from_memory<char>(r0));
 
@@ -30,34 +30,34 @@ uint32_t prgrmIsRunning(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, ui
     return struc;
 }
 
-uint32_t _FindResourceW(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp, Memory* stack, Memory* progmem)
+uint32_t _FindResourceW(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp)
 {
     return 0;
 }
 // 
 
-uint32_t _OpenFile(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp, Memory* stack, Memory* progmem)
+uint32_t _OpenFile(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp)
 {
     printf("    +name: %s, flags: %s", sExecutor->get_from_memory<char>(r0), sExecutor->get_from_memory<char>(r1));
     return 0;
 }
 
-uint32_t _LoadLibraryA(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp, Memory* stack, Memory* progmem)
+uint32_t _LoadLibraryA(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp)
 {
     return 1;
 }
 
-uint32_t _FreeLibrary(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp, Memory* stack, Memory* progmem)
+uint32_t _FreeLibrary(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp)
 {
     return 1;
 }
 
-uint32_t OSInitCriticalSection(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp, Memory* stack, Memory* progmem)
+uint32_t OSInitCriticalSection(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp)
 {
     return 0;
 }
 
-uint32_t lcalloc(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp, Memory* stack, Memory* progmem)
+uint32_t lcalloc(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp)
 {
     printf("    +nElements: %i | size: %i\n", r0, r1);
 
@@ -68,7 +68,7 @@ uint32_t lcalloc(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t 
     return virt_addr;
 }
 
-uint32_t lmalloc(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp, Memory* stack, Memory* progmem)
+uint32_t lmalloc(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp)
 {
     printf("    +size: %i\n", r0);
 

@@ -4,7 +4,7 @@
 #include "executor.h"
 #include "vprintf.h"
 
-uint32_t dbgMsg(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp, Memory* stack, Memory* progmem)
+uint32_t dbgMsg(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp)
 {
 
 

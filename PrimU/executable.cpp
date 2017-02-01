@@ -2,16 +2,17 @@
 
 #include <elfio/elfio.hpp>
 
-#include "memory.h"
+#include "MemoryManager.h"
 
-Executable::Executable(char* path) : m_state(EXEC_LOAD_FAILED), m_mem(new Memory())
+
+ErrorCode Executable::Load()
 {
     ELFIO::elfio reader;
 
-    if ( !reader.load(path) ) return;
+    if (!reader.load(_path)) return ERROR_LOADER_READER_FAIL;
 
-    check(reader.get_class(), ELFCLASS32)
-    check(reader.get_machine(), EM_ARM)
+    __check(reader.get_class(), ELFCLASS32, ERROR_LOADER_INCORRECT_ATTRIBUTE);
+    __check(reader.get_machine(), EM_ARM, ERROR_LOADER_INCORRECT_ATTRIBUTE);
 
     ELFIO::Elf_Half segSize = reader.segments.size();
 
@@ -19,16 +20,24 @@ Executable::Executable(char* path) : m_state(EXEC_LOAD_FAILED), m_mem(new Memory
     {
         const ELFIO::segment* seg = reader.segments[i];
 
-        auto addr = seg->get_virtual_address();
-        auto memSize = seg->get_memory_size();
+        _address = seg->get_virtual_address();
+        _size = seg->get_memory_size();
         auto fileSize = seg->get_file_size();
         auto data = seg->get_data();
 
-        if (!m_mem->alloc(memSize, addr)) return;
-        if (!m_mem->cpy(reinterpret_cast<const uint8_t*>(data), fileSize, addr)) return;
+        ErrorCode err;
+        MemoryBlock* memBlock;
+        __check((err = sMemoryManager->StaticAlloc(_address, _size, &memBlock)), ERROR_OK, err);
+
+        RealPtr addr = memBlock->GetRAddr();
+        if (memcpy_s(addr, _size, data, fileSize)) {
+            sMemoryManager->StaticFree(_address);
+            return ERROR_GENERIC;
+        }
     }
 
-    m_mem->align_4k();
-    m_entry = reader.get_entry();
-    m_state = EXEC_LOADED;
+    _entry = reader.get_entry();
+    _state = EXEC_LOADED;
+
+    return ERROR_OK;
 }

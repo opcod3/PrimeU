@@ -1,9 +1,8 @@
 ﻿#ifndef ELFLOADER_H
 #define ELFLOADER_H
 
-#include "stdafx.h"
-
-#define check(f, v) if (f != v) return;
+#include "common.h"
+#include <elfio/elfio.hpp>
 
 
 class Memory;
@@ -12,6 +11,8 @@ enum State
 {
     EXEC_LOADED       = 0x0,
     EXEC_EXECUTING    = 0x1,
+    EXEC_NOT_INITIALIZED = 0x2,
+
 
     EXEC_LOAD_FAILED  = -0x1
 };
@@ -20,20 +21,24 @@ enum State
 class Executable
 {
 public:
-    Executable(char* path);
-    static uint32_t load_elf_to_memory(char* path, Memory* mem);
+    Executable(char* path) : _path(path), _state(EXEC_NOT_INITIALIZED) { }
+    ErrorCode Load();
 
-    State get_state() { return m_state; }
-    uint32_t get_entry() { return m_entry; }
+    State get_state() { return _state; }
+    uint32_t get_entry() { return _entry; }
 
-    Memory* get_mem() { return m_mem; }
-
-private:
+    //Memory* get_mem() { return m_mem; }
 
 private:
-    State m_state;
-    Memory* m_mem;
-    uint32_t m_entry;
+
+private:
+    char* _path;
+
+    VirtPtr _address;
+    uint32_t _entry;
+    size_t _size;
+
+    State _state;
 };
 
 #endif

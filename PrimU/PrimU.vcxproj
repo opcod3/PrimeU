@@ -161,9 +161,13 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="common.h" />
     <ClInclude Include="executable.h" />
     <ClInclude Include="executor.h" />
     <ClInclude Include="handlers.h" />
+    <ClInclude Include="MemoryChunk.h" />
+    <ClInclude Include="MemoryManager.h" />
+    <ClInclude Include="MemoryBlock.h" />
     <ClInclude Include="vprintf.h" />
     <ClInclude Include="interrupt_handle.h" />
     <ClInclude Include="memory.h" />
@@ -176,8 +180,11 @@
     <ClCompile Include="executable.cpp" />
     <ClCompile Include="executor.cpp" />
     <ClCompile Include="memory.cpp" />
+    <ClCompile Include="MemoryChunk.cpp" />
+    <ClCompile Include="MemoryManager.cpp" />
     <ClCompile Include="PrimU.cpp" />
     <ClCompile Include="system.cpp" />
+    <ClCompile Include="MemoryBlock.cpp" />
     <ClCompile Include="vprintf.cpp" />
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>

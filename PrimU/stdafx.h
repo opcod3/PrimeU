@@ -14,6 +14,8 @@
 #include <map>
 #include <unicorn/unicorn.h>
 
+#include "common.h"
+
 
 
 // TODO: reference additional headers your program requires here
