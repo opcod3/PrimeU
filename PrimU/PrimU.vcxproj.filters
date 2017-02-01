@@ -19,6 +19,12 @@
     <Filter Include="Source Files\Memory">
       <UniqueIdentifier>{6d5b444d-e35c-4023-8065-f419aa15bf81}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Display">
+      <UniqueIdentifier>{24a6da14-345e-4f81-ad37-f40d76897e39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Display">
+      <UniqueIdentifier>{21362acd-d4f3-497b-bfd4-c62eac136f88}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -60,6 +66,9 @@
     <ClInclude Include="MemoryChunk.h">
       <Filter>Header Files\Memory</Filter>
     </ClInclude>
+    <ClInclude Include="LCD.h">
+      <Filter>Header Files\Display</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -91,6 +100,9 @@
     </ClCompile>
     <ClCompile Include="MemoryBlock.cpp">
       <Filter>Source Files\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="LCD.cpp">
+      <Filter>Header Files\Display</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

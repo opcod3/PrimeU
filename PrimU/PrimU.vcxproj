@@ -165,6 +165,7 @@
     <ClInclude Include="executable.h" />
     <ClInclude Include="executor.h" />
     <ClInclude Include="handlers.h" />
+    <ClInclude Include="LCD.h" />
     <ClInclude Include="MemoryChunk.h" />
     <ClInclude Include="MemoryManager.h" />
     <ClInclude Include="MemoryBlock.h" />
@@ -178,6 +179,7 @@
     <ClCompile Include="dbgout.cpp" />
     <ClCompile Include="executable.cpp" />
     <ClCompile Include="executor.cpp" />
+    <ClCompile Include="LCD.cpp" />
     <ClCompile Include="MemoryChunk.cpp" />
     <ClCompile Include="MemoryManager.cpp" />
     <ClCompile Include="PrimU.cpp" />

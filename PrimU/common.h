@@ -22,8 +22,9 @@ typedef uint8_t* RealPtr;
 
 enum RegionSize : size_t
 {
-    MEM_STACK_SIZE   = 0x05000000,
-    MEM_DYNAMIC_SIZE = 0x10000000
+    MEM_STACK_SIZE = 0x05000000,
+    MEM_DYNAMIC_SIZE = 0x10000000,
+    LCD_BUFFER_SIZE = 320 * 240 * 4
 };
 
 enum MemoryRegion : VirtPtr

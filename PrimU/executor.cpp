@@ -40,6 +40,8 @@ bool Executor::initialize(Executable* exec)
     m_sp = stackBlock->GetVAddr() + stackBlock->GetSize();
     callAndcheckError(uc_reg_write(m_uc, UC_ARM_REG_SP, &m_sp));
 
+    __check(sMemoryManager->StaticAlloc(LCD_BUFFER, LCD_BUFFER_SIZE), ERROR_OK, false);
+
     return true;
 }
 
@@ -58,9 +60,9 @@ void Executor::init_interrupts_()
     DEFINE_INTERRUPT(SDKLIB_OSWaitForSemaphore,           HANDLE_NAMEONLY, "OSWaitForSemaphore",           nullptr);
     DEFINE_INTERRUPT(SDKLIB_OSReleaseSemaphore,           HANDLE_NAMEONLY, "OSReleaseSemaphore",           nullptr);
     DEFINE_INTERRUPT(SDKLIB_OSCloseSemaphore,             HANDLE_NAMEONLY, "OSCloseSemaphore",             nullptr);
-    DEFINE_INTERRUPT(SDKLIB_OSCreateEvent,                HANDLE_NAMEONLY, "OSCreateEvent",                nullptr);
+    DEFINE_INTERRUPT(SDKLIB_OSCreateEvent,                HANDLE_IMPLEMENTED, "OSCreateEvent",             OSCreateEvent);
     DEFINE_INTERRUPT(SDKLIB_OSWaitForEvent,               HANDLE_NAMEONLY, "OSWaitForEvent",               nullptr);
-    DEFINE_INTERRUPT(SDKLIB_OSSetEvent,                   HANDLE_NAMEONLY, "OSSetEvent",                   nullptr);
+    DEFINE_INTERRUPT(SDKLIB_OSSetEvent,                   HANDLE_IMPLEMENTED, "OSSetEvent",                OSSetEvent);
     DEFINE_INTERRUPT(SDKLIB_OSResetEvent,                 HANDLE_NAMEONLY, "OSResetEvent",                 nullptr);
     DEFINE_INTERRUPT(SDKLIB_OSCloseEvent,                 HANDLE_NAMEONLY, "OSCloseEvent",                 nullptr);
     DEFINE_INTERRUPT(SDKLIB_OSInitCriticalSection,        HANDLE_IMPLEMENTED, "OSInitCriticalSection",     OSInitCriticalSection);
@@ -86,7 +88,7 @@ void Executor::init_interrupts_()
     DEFINE_INTERRUPT(SDKLIB_setvect,                      HANDLE_NAMEONLY, "setvect",                      nullptr);
     DEFINE_INTERRUPT(SDKLIB_GetLCDContrast,               HANDLE_NAMEONLY, "GetLCDContrast",               nullptr);
     DEFINE_INTERRUPT(SDKLIB_SetLCDContrast,               HANDLE_NAMEONLY, "SetLCDContrast",               nullptr);
-    DEFINE_INTERRUPT(SDKLIB_LCDOn,                        HANDLE_NAMEONLY, "LCDOn",                        nullptr);
+    DEFINE_INTERRUPT(SDKLIB_LCDOn,                        HANDLE_IMPLEMENTED, "LCDOn",                     LCDOn);
     DEFINE_INTERRUPT(SDKLIB_LCDOff,                       HANDLE_NAMEONLY, "LCDOff",                       nullptr);
     DEFINE_INTERRUPT(SDKLIB_CheckLCDOn,                   HANDLE_NAMEONLY, "CheckLCDOn",                   nullptr);
     DEFINE_INTERRUPT(SDKLIB_Buzzer,                       HANDLE_NAMEONLY, "Buzzer",                       nullptr);
@@ -186,7 +188,7 @@ void Executor::init_interrupts_()
     DEFINE_INTERRUPT(SDKLIB___fillrect,                   HANDLE_NAMEONLY, "__fillrect",                   nullptr);
     DEFINE_INTERRUPT(SDKLIB_SetActiveLCD,                 HANDLE_NAMEONLY, "SetActiveLCD",                 nullptr);
     DEFINE_INTERRUPT(SDKLIB_SetRealLCD,                   HANDLE_NAMEONLY, "SetRealLCD",                   nullptr);
-    DEFINE_INTERRUPT(SDKLIB_GetActiveLCD,                 HANDLE_NAMEONLY, "GetActiveLCD",                 nullptr);
+    DEFINE_INTERRUPT(SDKLIB_GetActiveLCD,                 HANDLE_IMPLEMENTED, "GetActiveLCD",              GetActiveLCD);
     DEFINE_INTERRUPT(SDKLIB_CreateCompatibleLCD,          HANDLE_NAMEONLY, "CreateCompatibleLCD",          nullptr);
     DEFINE_INTERRUPT(SDKLIB_CreateCompatibleImage,        HANDLE_NAMEONLY, "CreateCompatibleImage",        nullptr);
     DEFINE_INTERRUPT(SDKLIB_DeleteLCD,                    HANDLE_NAMEONLY, "DeleteLCD",                    nullptr);
@@ -818,7 +820,7 @@ void Executor::execute()
     if (m_err != UC_ERR_OK) {
         uint32_t lr;
         uc_reg_read(m_uc, UC_ARM_REG_LR, &lr);
-        printf("Execution aborted on error: %s! LR: 0x%08X", uc_strerror(m_err), lr);
+        printf("Execution aborted on error: %s!\nLR: 0x%08X\n", uc_strerror(m_err), lr);
     }
 
 }
@@ -853,6 +855,7 @@ void interrupt_hook(uc_engine *uc, uint64_t address, uint32_t size, void *user_d
             break;
         case HANDLE_NAMEONLY:
             printf("[%05X] %s() UNHANDLED\n", _handle->id, _handle->name);
+            printf("    r0: %08X|%i\n    r1: %08X|%i\n    r2: %08X|%i\n    r3: %08X|%i\n    sp: %08X\n", r0, r0, r1, r1, r2, r2, r3, r3, sp);
             break;
         case HANDLE_UNKOWN:
         default:
@@ -863,7 +866,7 @@ void interrupt_hook(uc_engine *uc, uint64_t address, uint32_t size, void *user_d
     }
     else
         printf("[%05X] UNDEFINED\n", SVC);
-    printf("    +Caller: %08X\n", lr - 4);
+    printf("    Caller: %08X\n", lr - 4);
 
     
     sp += 8;

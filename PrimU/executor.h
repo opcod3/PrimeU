@@ -42,6 +42,7 @@ private:
     uint32_t m_sp;
 
     Memory* m_dynamic;
+    Memory* m_LCD;
 
 public:
     Executor(Executor const&) = delete;
