@@ -7,6 +7,8 @@ MemoryChunk* MemoryBlock::VirtualAlloc(size_t size)
 
     uint32_t offset = GetSize() - _free;
     MemoryChunk* newChunk = new MemoryChunk(GetVAddr() + offset, GetRAddr() + offset, size);
+    _chunks.insert(newChunk);
+
     _free -= size;
 }
 

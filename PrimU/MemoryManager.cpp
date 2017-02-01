@@ -11,7 +11,7 @@ ErrorCode MemoryManager::StaticAlloc(VirtPtr addr, size_t size, MemoryBlock** me
         return ERROR_MEM_ALREADY_ALLOCATED;
 
     uint32_t pageCount = size % PAGE_SIZE == 0 ? size / PAGE_SIZE : size / PAGE_SIZE + 1;
-    RealPtr realMemory = reinterpret_cast<RealPtr>(malloc(pageCount * PAGE_SIZE));
+    RealPtr realMemory = reinterpret_cast<RealPtr>(calloc(pageCount, PAGE_SIZE));
     size_t pageAlignedSize = pageCount * PAGE_SIZE;
 
     if (realMemory == nullptr)
