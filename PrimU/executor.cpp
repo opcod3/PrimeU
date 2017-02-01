@@ -40,13 +40,6 @@ bool Executor::initialize(Executable* exec)
     m_sp = stackBlock->GetVAddr() + stackBlock->GetSize();
     callAndcheckError(uc_reg_write(m_uc, UC_ARM_REG_SP, &m_sp));
 
-
-    m_dynamic = new Memory;
-    m_dynamic->alloc(0x05000000, 0x00001000);
-    callAndcheckError(uc_mem_map_ptr(m_uc, m_dynamic->get_offset(), m_dynamic->get_size(), UC_PROT_READ | UC_PROT_WRITE, m_dynamic->get_data()));
-
-    m_dynamic_free.insert(std::pair<uint32_t, size_t>(m_dynamic->get_offset(), m_dynamic->get_size()));
-
     return true;
 }
 

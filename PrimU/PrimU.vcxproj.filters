@@ -51,9 +51,6 @@
     <ClInclude Include="common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="memory.h">
-      <Filter>Header Files\Memory</Filter>
-    </ClInclude>
     <ClInclude Include="MemoryManager.h">
       <Filter>Header Files\Memory</Filter>
     </ClInclude>
@@ -85,9 +82,6 @@
     </ClCompile>
     <ClCompile Include="system.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="memory.cpp">
-      <Filter>Source Files\Memory</Filter>
     </ClCompile>
     <ClCompile Include="MemoryManager.cpp">
       <Filter>Source Files\Memory</Filter>
