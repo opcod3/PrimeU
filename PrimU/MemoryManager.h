@@ -15,7 +15,7 @@ public:
     ErrorCode StaticAlloc(VirtPtr addr, size_t size, MemoryBlock** memoryBlock = nullptr);
     ErrorCode StaticFree(VirtPtr addr);
 
-    ErrorCode DyanmicAlloc(size_t size);
+    ErrorCode DyanmicAlloc(VirtPtr* addr, size_t size);
     ErrorCode DynamicFree(VirtPtr addr);
 
     VirtPtr GetVirtualAddr(RealPtr realPtr);
@@ -29,7 +29,11 @@ private:
     void operator=(MemoryManager const&) = delete;
     static MemoryManager* _instance;
 
+
+    VirtPtr _dynamicPagecount = 0;
+
     std::unordered_set<MemoryBlock*> _blocks;
 };
 
 #define sMemoryManager MemoryManager::GetInstance()
+#define __GET(T, a) reinterpret_cast<T>(sMemoryManager->GetRealAddr(a))

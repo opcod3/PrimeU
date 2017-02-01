@@ -8,7 +8,7 @@ uint32_t dbgMsg(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r
 {
 
 
-    auto stack_ptr = sExecutor->get_from_memory<uint32_t>(sp);
+    auto stack_ptr = __GET(uint32_t*, sp);
 
     if (stack_ptr == nullptr)
         return -1;
@@ -18,7 +18,7 @@ uint32_t dbgMsg(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r
     *(stack_ptr - 0x8) = r2;
     *(stack_ptr - 0x4) = r3;
     //va_list args = sp;
-    char* fmt = sExecutor->get_from_memory<char>(r0);
+    char* fmt = __GET(char*, r0);
 
     if (fmt != nullptr)
         ee_vsprintf(fmt, reinterpret_cast<va_list>(stack_ptr - 0xC));

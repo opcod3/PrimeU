@@ -3,13 +3,15 @@
 MemoryChunk* MemoryBlock::VirtualAlloc(size_t size)
 {
     if (!CanAllocate(size))
-        return 0;
+        return nullptr;
 
     uint32_t offset = GetSize() - _free;
     MemoryChunk* newChunk = new MemoryChunk(GetVAddr() + offset, GetRAddr() + offset, size);
     _chunks.insert(newChunk);
 
     _free -= size;
+
+    return newChunk;
 }
 
 void MemoryBlock::VirtualFree(uint32_t vAddr)

@@ -14,6 +14,7 @@ public:
 
 
     size_t GetFree() { return _free; }
+    uint32_t GetPageCount() { return _pageCount; }
     bool CanAllocate(size_t size) { return _free >= size; }
     bool CanFree() { return _freed == GetSize() - _free; }
 

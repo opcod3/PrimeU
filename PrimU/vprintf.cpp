@@ -514,7 +514,7 @@ void ee_vsprintf(const char *fmt, va_list args)
             continue;
 
         case 's':
-            s = sExecutor->get_from_memory<char>(va_arg(args, uint32_t));
+            s = __GET(char*, va_arg(args, VirtPtr));
             if (!s) s = "<NULL>";
             len = strnlen(s, precision);
             if (!(flags & LEFT)) while (len < field_width--) putchar(' ');

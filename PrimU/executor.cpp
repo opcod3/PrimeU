@@ -34,7 +34,7 @@ bool Executor::initialize(Executable* exec)
     callAndcheckError(uc_hook_add(m_uc, &m_interrupt_hook, UC_HOOK_INTR, interrupt_hook, this, 0, 1));
 
     MemoryBlock* stackBlock;
-    __check(sMemoryManager->StaticAlloc(MEM_STACK, 0x05000000, &stackBlock), ERROR_OK, false);
+    __check(sMemoryManager->StaticAlloc(MEM_STACK, MEM_STACK_SIZE, &stackBlock), ERROR_OK, false);
 
 
     m_sp = stackBlock->GetVAddr() + stackBlock->GetSize();
@@ -110,7 +110,7 @@ void Executor::init_interrupts_()
     DEFINE_INTERRUPT(SDKLIB_lmalloc,                      HANDLE_IMPLEMENTED, "lmalloc",                   lmalloc);
     DEFINE_INTERRUPT(SDKLIB_lcalloc,                      HANDLE_IMPLEMENTED, "lcalloc",                   lcalloc);
     DEFINE_INTERRUPT(SDKLIB_lrealloc,                     HANDLE_NAMEONLY, "lrealloc",                     nullptr);
-    DEFINE_INTERRUPT(SDKLIB__lfree,                       HANDLE_NAMEONLY, "_lfree",                       nullptr);
+    DEFINE_INTERRUPT(SDKLIB__lfree,                       HANDLE_IMPLEMENTED, "_lfree",                    _lfree);
     DEFINE_INTERRUPT(SDKLIB_GetPenEvent,                  HANDLE_NAMEONLY, "GetPenEvent",                  nullptr);
     DEFINE_INTERRUPT(SDKLIB_CheckPenEvent,                HANDLE_NAMEONLY, "CheckPenEvent",                nullptr);
     DEFINE_INTERRUPT(SDKLIB_ClearPenEvent,                HANDLE_NAMEONLY, "ClearPenEvent",                nullptr);

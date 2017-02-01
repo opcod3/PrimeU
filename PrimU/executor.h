@@ -22,43 +22,6 @@ public:
     uc_err get_last_error() { return m_err; }
     uc_engine* GetUcInstance() { return m_uc; }
 
-    template<typename T>
-    T* Executor::get_from_memory(uint32_t addr)
-    {
-        T* ptr;
-        ptr = reinterpret_cast<T*>(sMemoryManager->GetRealAddr(addr));
-
-        if (ptr != nullptr) return ptr;
-
-        if (addr >= m_dynamic->get_offset() &&
-            addr < m_dynamic->get_offset() + m_dynamic->get_size())
-            return m_dynamic->get<T>(addr);
-
-        return nullptr;
-    }
-
-    uint32_t alloc_dynamic_mem(size_t size)
-    {
-        uint32_t addr = 0;
-        size_t origSize = 0;
-
-        for (auto freechunk : m_dynamic_free) {
-            if (freechunk.second > size) {
-                addr = freechunk.first;
-                origSize = freechunk.second;
-                break;
-            }
-        }
-
-        if (!addr || !origSize)
-            return 0;
-
-        m_dynamic_free.erase(addr);
-
-        m_dynamic_free.insert(std::pair<uint32_t, size_t>(addr + size, origSize - size));
-        return addr;
-    }
-
     friend void interrupt_hook(uc_engine *uc, uint64_t address, uint32_t size, void *user_data);
 
 private:

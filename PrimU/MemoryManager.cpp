@@ -57,6 +57,43 @@ ErrorCode MemoryManager::StaticFree(VirtPtr addr)
     return ERROR_MEM_ADDR_NOT_ALLOCATED;
 }
 
+ErrorCode MemoryManager::DyanmicAlloc(VirtPtr* addr, size_t size)
+{
+    if (isVAddrAllocated(*addr))
+        return ERROR_MEM_ALREADY_ALLOCATED;
+
+    for (auto block : _blocks) {
+        if (block->CanAllocate(size)) {
+            *addr = block->VirtualAlloc(size)->GetVAddr();
+            break;
+        }
+    }
+
+    *addr = _dynamicPagecount*PAGE_SIZE + MEM_DYNAMIC;
+    MemoryBlock* block;
+    ErrorCode err;
+    if ((err = StaticAlloc(*addr, size, &block)) != ERROR_OK) {
+        return err;
+    }
+
+    _dynamicPagecount += block->GetPageCount();
+    return ERROR_OK;
+}
+
+ErrorCode MemoryManager::DynamicFree(VirtPtr addr)
+{
+    for (auto block : _blocks) {
+        if (block->ContainsVAddr(addr)) {
+            block->VirtualFree(addr);
+            if (block->CanFree());
+                // TODO: Free Block 
+        }
+    }
+
+    return ERROR_MEM_ADDR_NOT_ALLOCATED;
+}
+
+
 bool MemoryManager::isVAddrAllocated(VirtPtr virtPtr)
 {
     for (auto block : _blocks) {

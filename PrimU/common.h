@@ -20,14 +20,23 @@ enum ErrorCode {
 typedef uint32_t VirtPtr;
 typedef uint8_t* RealPtr;
 
+enum RegionSize : size_t
+{
+    MEM_STACK_SIZE   = 0x05000000,
+    MEM_DYNAMIC_SIZE = 0x10000000
+};
+
 enum MemoryRegion : VirtPtr
 {
     MEM_STACK = 0x10000000,
+    MEM_DYNAMIC = MEM_STACK + MEM_STACK_SIZE,
     LCD_BUFFER = 0x40600000
 };
+
 
 #define PAGE_SIZE 0x1000
 
 #define __check(f, v, e) if (f != v) return e
+#define __CAST(t, v) reinterpret_cast<t>(v)
 
 #endif
