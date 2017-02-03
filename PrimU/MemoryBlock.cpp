@@ -18,6 +18,7 @@ void MemoryBlock::VirtualFree(uint32_t vAddr)
 {
     for (auto it = _chunks.begin(); it != _chunks.end(); ++it) {
         if ((*it)->GetVAddr() == vAddr) {
+            _freed += (*it)->GetSize();
             delete *it;
             _chunks.erase(it);
             break;
