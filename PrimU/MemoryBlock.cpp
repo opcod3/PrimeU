@@ -35,3 +35,23 @@ bool MemoryBlock::ContainsVAddr(VirtPtr vPtr) const
 
     return false;
 }
+
+bool MemoryBlock::ContainsRAddr(RealPtr rPtr) const
+{
+    for (auto chunk : _chunks) {
+        if (chunk->ContainsRAddr(rPtr))
+            return true;
+    }
+
+    return false;
+}
+
+MemoryChunk MemoryBlock::GetChunk(VirtPtr addr)
+{
+    for (auto chunk : _chunks) {
+        if (chunk->ContainsVAddr(addr))
+            return *chunk;
+    }
+
+    return MemoryChunk(0,0,0);
+}

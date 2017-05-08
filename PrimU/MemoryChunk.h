@@ -11,6 +11,7 @@ public:
     RealPtr GetRAddr() const { return _realAddress; }
     size_t GetSize() const { return _size; }
     virtual bool ContainsVAddr(VirtPtr vPtr) const;
+    virtual bool ContainsRAddr(RealPtr rPtr) const;
 
     VirtPtr GetVAddr(RealPtr rPtr);
     RealPtr GetRAddr(VirtPtr vPtr);

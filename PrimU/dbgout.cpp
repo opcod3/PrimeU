@@ -3,22 +3,23 @@
 #include "memory.h"
 #include "executor.h"
 #include "vprintf.h"
+#include "InterruptHandler.h"
 
-uint32_t dbgMsg(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp)
+uint32_t dbgMsg(Arguments* args)
 {
 
 
-    auto stack_ptr = __GET(uint32_t*, sp);
+    auto stack_ptr = __GET(uint32_t*, args->sp);
 
     if (stack_ptr == nullptr)
         return -1;
 
-    *(stack_ptr - 0x10) = r0;
-    *(stack_ptr - 0xC) = r1;
-    *(stack_ptr - 0x8) = r2;
-    *(stack_ptr - 0x4) = r3;
+    *(stack_ptr - 0x10) = args->r0;
+    *(stack_ptr - 0xC) = args->r1;
+    *(stack_ptr - 0x8) = args->r2;
+    *(stack_ptr - 0x4) = args->r3;
     //va_list args = sp;
-    char* fmt = __GET(char*, r0);
+    char* fmt = __GET(char*, args->r0);
 
     if (fmt != nullptr)
         ee_vsprintf(fmt, reinterpret_cast<va_list>(stack_ptr - 0xC));

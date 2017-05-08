@@ -27,3 +27,11 @@ bool MemoryChunk::ContainsVAddr(VirtPtr vPtr) const
 
     return true;
 }
+
+bool MemoryChunk::ContainsRAddr(RealPtr rPtr) const
+{
+    if (rPtr < GetRAddr() || rPtr >= GetRAddr() + GetSize())
+        return false;
+
+    return true;
+}

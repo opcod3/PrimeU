@@ -17,6 +17,7 @@ public:
 
     ErrorCode DyanmicAlloc(VirtPtr* addr, size_t size);
     ErrorCode DynamicFree(VirtPtr addr);
+    ErrorCode DynamicRealloc(VirtPtr* addr, size_t newsize);
 
     VirtPtr GetVirtualAddr(RealPtr realPtr);
     RealPtr GetRealAddr(VirtPtr virtPtr);

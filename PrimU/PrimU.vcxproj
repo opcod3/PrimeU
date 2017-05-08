@@ -169,8 +169,9 @@
     <ClInclude Include="MemoryChunk.h" />
     <ClInclude Include="MemoryManager.h" />
     <ClInclude Include="MemoryBlock.h" />
+    <ClInclude Include="SystemAPI.h" />
     <ClInclude Include="vprintf.h" />
-    <ClInclude Include="interrupt_handle.h" />
+    <ClInclude Include="InterruptHandler.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="interrupts.h" />
     <ClInclude Include="targetver.h" />
@@ -185,6 +186,7 @@
     <ClCompile Include="PrimU.cpp" />
     <ClCompile Include="system.cpp" />
     <ClCompile Include="MemoryBlock.cpp" />
+    <ClCompile Include="SystemAPI.cpp" />
     <ClCompile Include="vprintf.cpp" />
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>

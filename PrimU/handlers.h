@@ -5,21 +5,26 @@
 class Memory;
 
 
-uint32_t dbgMsg(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp);
+uint32_t dbgMsg(Arguments* args);
 
 
-uint32_t getCurrentDir(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp);
-uint32_t prgrmIsRunning(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp);
-uint32_t _FindResourceW(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp);
-uint32_t _OpenFile(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp);
-uint32_t _LoadLibraryA(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp);
-uint32_t _FreeLibrary(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp);
-uint32_t OSInitCriticalSection(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp);
-uint32_t OSSetEvent(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp);
-uint32_t OSCreateEvent(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp);
-uint32_t LCDOn(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp);
-uint32_t GetActiveLCD(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp);
+uint32_t getCurrentDir(Arguments* args);
+uint32_t prgrmIsRunning(Arguments* args);
+uint32_t _FindResourceW(Arguments* args);
+uint32_t _OpenFile(Arguments* args);
+uint32_t _LoadLibraryA(Arguments* args);
+uint32_t _FreeLibrary(Arguments* args);
+uint32_t OSInitCriticalSection(Arguments* args);
+uint32_t OSSetEvent(Arguments* args);
+uint32_t OSCreateEvent(Arguments* args);
+uint32_t LCDOn(Arguments* args);
+uint32_t GetActiveLCD(Arguments* args);
 
-uint32_t lcalloc(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp);
-uint32_t lmalloc(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp);
-uint32_t _lfree(uc_engine* uc, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, uint32_t sp);
+uint32_t lcalloc(Arguments* args);
+uint32_t lmalloc(Arguments* args);
+uint32_t _lfree(Arguments* args);
+uint32_t lrealloc(Arguments* args);
+
+uint32_t _amkdir(Arguments* args);
+uint32_t _achdir(Arguments* args);
+uint32_t __wfopen(Arguments* args);

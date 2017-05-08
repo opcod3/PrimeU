@@ -21,8 +21,10 @@ public:
     MemoryChunk* VirtualAlloc(size_t size);
     void VirtualFree(uint32_t vAddr);
 
-    bool ContainsVAddr(VirtPtr vPtr) const override;
+    MemoryChunk GetChunk(VirtPtr addr);
 
+    bool ContainsVAddr(VirtPtr vPtr) const override;
+    bool ContainsRAddr(RealPtr rPtr) const override;
 private:
     uint32_t _pageCount;
     size_t _free;

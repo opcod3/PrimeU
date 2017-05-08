@@ -59,8 +59,10 @@ ErrorCode MemoryManager::StaticFree(VirtPtr addr)
 
 ErrorCode MemoryManager::DyanmicAlloc(VirtPtr* addr, size_t size)
 {
-    if (isVAddrAllocated(*addr))
+    if (isVAddrAllocated(*addr)) {
+        __debugbreak();
         return ERROR_MEM_ALREADY_ALLOCATED;
+    }
 
     for (auto block : _blocks) {
         if (block->CanAllocate(size)) {
@@ -73,6 +75,7 @@ ErrorCode MemoryManager::DyanmicAlloc(VirtPtr* addr, size_t size)
     MemoryBlock* block;
     ErrorCode err;
     if ((err = StaticAlloc(*addr, size, &block)) != ERROR_OK) {
+        __debugbreak();
         return err;
     }
 
@@ -90,6 +93,29 @@ ErrorCode MemoryManager::DynamicFree(VirtPtr addr)
         }
     }
 
+    return ERROR_MEM_ADDR_NOT_ALLOCATED;
+}
+
+ErrorCode MemoryManager::DynamicRealloc(VirtPtr* addr, size_t newsize)
+{
+    VirtPtr oldAddr = *addr;
+    for (auto block : _blocks) {
+        if (block->ContainsVAddr(oldAddr)) {
+            MemoryChunk chunk = block->GetChunk(oldAddr);
+            if (block->CanAllocate(chunk.GetSize())) {
+                MemoryChunk *newchunk = block->VirtualAlloc(newsize);
+                memcpy(newchunk->GetRAddr(), chunk.GetRAddr(), chunk.GetSize());
+                block->VirtualFree(chunk.GetVAddr());
+            }
+            else {
+                *addr = 0;
+                this->DyanmicAlloc(addr, newsize);
+                memcpy(this->GetRealAddr(*addr), chunk.GetRAddr(), chunk.GetSize());
+                this->DynamicFree(oldAddr);
+            }
+            
+        }
+    }
     return ERROR_MEM_ADDR_NOT_ALLOCATED;
 }
 
@@ -115,4 +141,17 @@ RealPtr MemoryManager::GetRealAddr(VirtPtr virtPtr)
 
     return nullptr;
 }
+
+VirtPtr MemoryManager::GetVirtualAddr(RealPtr realPtr)
+{
+    for (auto block : _blocks)
+    {
+        if (block->ContainsRAddr(realPtr)) {
+            return block->GetVAddr(realPtr);
+        }
+    }
+
+    return 0x0;
+}
+
 

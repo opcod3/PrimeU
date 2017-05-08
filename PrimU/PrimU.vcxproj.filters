@@ -25,6 +25,12 @@
     <Filter Include="Source Files\Display">
       <UniqueIdentifier>{21362acd-d4f3-497b-bfd4-c62eac136f88}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\System">
+      <UniqueIdentifier>{461a858c-f790-4332-bf97-dfccea1b894b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\System">
+      <UniqueIdentifier>{f768fbd4-54f9-4969-8ab9-16f179dbb859}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -43,9 +49,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="interrupts.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="interrupt_handle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vprintf.h">
@@ -68,6 +71,12 @@
     </ClInclude>
     <ClInclude Include="LCD.h">
       <Filter>Header Files\Display</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemAPI.h">
+      <Filter>Header Files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="InterruptHandler.h">
+      <Filter>Header Files\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -103,6 +112,9 @@
     </ClCompile>
     <ClCompile Include="LCD.cpp">
       <Filter>Header Files\Display</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemAPI.cpp">
+      <Filter>Source Files\System</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
