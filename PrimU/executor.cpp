@@ -5,10 +5,11 @@
 #include "executable.h"
 #include "interrupts.h"
 #include "InterruptHandler.h"
-#include <valarray>
-
-#include "handlers.h"
 #include "SystemAPI.h"
+
+#include <valarray>
+#include <chrono>
+
 
 Executor* Executor::m_instance = nullptr;
 
@@ -19,14 +20,15 @@ Executor* Executor::m_instance = nullptr;
 
 void code_hook(uc_engine *uc, uint64_t address, uint32_t size, void *user_data)
 {
-    static int counter = 0;
+    static auto lastUpdate = std::chrono::high_resolution_clock::now();
 
-    if (counter < THREAD_INS) {
-        counter++;
+    auto now = std::chrono::high_resolution_clock::now();
+    std::chrono::milliseconds elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastUpdate);
+    if (elapsed.count() < sExecutor->GetCurrentThreadQuantum()) {
         return;
     }
 
-    counter = 0;
+    lastUpdate = std::chrono::high_resolution_clock::now();
     sExecutor->_currentThread->SaveState();
     uc_emu_stop(sExecutor->GetUcInstance());
     printf(">>> Stopping at 0x%llX, instruction size = 0x%x\n", address, size);
@@ -101,8 +103,7 @@ void Executor::execute()
         if (m_err != UC_ERR_OK)
             break;
 
-        if (_currentThread != _currentThread->GetNextThread() &&
-            _currentThread->GetPriority() <= _currentThread->GetNextThread()->GetPriority() ) {
+        if (_currentThread != _currentThread->GetNextThread()) {
             _currentThread = _currentThread->GetNextThread();
             _currentThread->LoadState();
             printf("switching threads\n");
@@ -186,10 +187,31 @@ int Executor::NewThread(VirtPtr start, uint32_t arg, uint8_t priority, size_t st
     return newThread->GetId();
 }
 
+int Executor::SetThreadPriority(int threadId, uint8_t priority)
+{
+    for (Thread* thread = nullptr; thread != _currentThread; thread = thread->GetNextThread()) {
+        if (thread == nullptr)
+            thread = _currentThread;
+
+        if (thread->GetId() == threadId) {
+            thread->SetPriority(priority);
+            return 1;
+        }
+    }
+    return NULL;
+}
+
+
 int Executor::GetCurrentThreadId() const
 {
     return _currentThread->GetId();
 }
+
+uint32_t Executor::GetCurrentThreadQuantum() const
+{
+    return _currentThread->GetTimeQuantum();
+}
+
 
 
 int Thread::GenerateUniqueId()
@@ -242,3 +264,7 @@ void ThreadState::SaveState()
 }
 
 
+uint32_t Thread::GetTimeQuantum()
+{
+    return _priority;
+}

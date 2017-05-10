@@ -36,7 +36,9 @@ public:
     friend void interrupt_hook(uc_engine *uc, uint64_t address, uint32_t size, void *user_data);
     friend void code_hook(uc_engine *uc, uint64_t address, uint32_t size, void *user_data);
     int NewThread(VirtPtr start, uint32_t arg = 0, uint8_t priority = THREAD_PRIORITY_NORMAL, size_t stackSize = 0x2000);
+    int SetThreadPriority(int threadId, uint8_t priority);
     int GetCurrentThreadId() const;
+    uint32_t GetCurrentThreadQuantum() const;
 
 private:
     Executor() : m_uc(nullptr)
@@ -146,6 +148,7 @@ public:
 
     void SetPriority(uint8_t priority) { _priority = priority; }
     uint8_t GetPriority() const { return _priority; }
+    uint32_t GetTimeQuantum();
 
     void SaveState();
     void LoadState();

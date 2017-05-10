@@ -30,3 +30,4 @@ uint32_t _achdir(Arguments* args);
 uint32_t __wfopen(Arguments* args);
 
 uint32_t OSCreateThread(Arguments* args);
+uint32_t OSSetThreadPriority(Arguments* args);

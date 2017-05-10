@@ -61,6 +61,7 @@ uint32_t _FreeLibrary(Arguments* args)
 
 uint32_t OSInitCriticalSection(Arguments* args)
 {
+    DUMPARGS;
     return 0;
 }
 
@@ -174,4 +175,11 @@ uint32_t OSCreateThread(Arguments* args)
 {
     DUMPARGS;
     return sExecutor->NewThread(args->r0, args->r4);
+}
+
+uint32_t OSSetThreadPriority(Arguments* args)
+{
+    DUMPARGS;
+    sExecutor->SetThreadPriority(args->r0, args->r1);
+    return 0;
 }

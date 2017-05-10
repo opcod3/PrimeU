@@ -10,7 +10,7 @@ SystemAPI::SystemAPI()
 {
     REGISTER_HANDLER(SDKLIB_OSCreateThread,               HANDLE_IMPLEMENTED, "OSCreateThread",            OSCreateThread);
     REGISTER_HANDLER(SDKLIB_OSTerminateThread,            HANDLE_NAMEONLY, "OSTerminateThread",            nullptr);
-    REGISTER_HANDLER(SDKLIB_OSSetThreadPriority,          HANDLE_NAMEONLY, "OSSetThreadPriority",          nullptr);
+    REGISTER_HANDLER(SDKLIB_OSSetThreadPriority,          HANDLE_IMPLEMENTED, "OSSetThreadPriority",       OSSetThreadPriority);
     REGISTER_HANDLER(SDKLIB_OSGetThreadPriority,          HANDLE_NAMEONLY, "OSGetThreadPriority",          nullptr);
     REGISTER_HANDLER(SDKLIB_OSSuspendThread,              HANDLE_NAMEONLY, "OSSuspendThread",              nullptr);
     REGISTER_HANDLER(SDKLIB_OSResumeThread,               HANDLE_NAMEONLY, "OSResumeThread",               nullptr);
