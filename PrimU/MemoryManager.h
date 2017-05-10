@@ -23,6 +23,8 @@ public:
     RealPtr GetRealAddr(VirtPtr virtPtr);
     bool isVAddrAllocated(VirtPtr virtPtr);
 
+    size_t GetAllocSize(VirtPtr addr);
+
 private:
     MemoryManager() { }
     ~MemoryManager() { delete _instance; }

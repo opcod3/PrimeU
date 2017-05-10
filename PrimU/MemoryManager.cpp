@@ -154,4 +154,14 @@ VirtPtr MemoryManager::GetVirtualAddr(RealPtr realPtr)
     return 0x0;
 }
 
+size_t MemoryManager::GetAllocSize(VirtPtr addr)
+{
+    for (auto block : _blocks) {
+        if (block->ContainsVAddr(addr)) {
+            return block->GetChunk(addr).GetSize();
+        }
+    }
+
+    return 0x0;
+}
 

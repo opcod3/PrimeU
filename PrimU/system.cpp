@@ -8,8 +8,9 @@
 #include "LCD.h"
 #include "InterruptHandler.h"
 
-#define DUMPARGS printf("    r0: %08X|%i\n    r1: %08X|%i\n    r2: %08X|%i\n    r3: %08X|%i\n    sp: %08X\n", args->r0, args->r0, args->r1, \
-    args->r1, args->r2, args->r2, args->r3, args->r3, args->sp)
+#define DUMPARGS printf("    r0: %08X|%i\n    r1: %08X|%i\n    r2: %08X|%i\n    r3: %08X|%i\n    r4: %08X|%i\n    sp: %08X\n", \
+    args->r0, args->r0, args->r1, args->r1, args->r2,\
+    args->r2, args->r3, args->r3, args->r4, args->r4, args->sp)
 
 VirtPtr struc = 0;
 
@@ -167,4 +168,10 @@ uint32_t __wfopen(Arguments* args)
 {
     wprintf(L"    +name: %s, flags: %s", __GET(wchar_t*, args->r0), __GET(wchar_t*, args->r1));
     return 0;
+}
+
+uint32_t OSCreateThread(Arguments* args)
+{
+    DUMPARGS;
+    return sExecutor->NewThread(args->r0, args->r4);
 }

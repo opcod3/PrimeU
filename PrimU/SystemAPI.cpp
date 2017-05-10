@@ -8,7 +8,7 @@ SystemAPI* SystemAPI::_instance = nullptr;
 
 SystemAPI::SystemAPI()
 {
-    REGISTER_HANDLER(SDKLIB_OSCreateThread,               HANDLE_NAMEONLY, "OSCreateThread",               nullptr);
+    REGISTER_HANDLER(SDKLIB_OSCreateThread,               HANDLE_IMPLEMENTED, "OSCreateThread",            OSCreateThread);
     REGISTER_HANDLER(SDKLIB_OSTerminateThread,            HANDLE_NAMEONLY, "OSTerminateThread",            nullptr);
     REGISTER_HANDLER(SDKLIB_OSSetThreadPriority,          HANDLE_NAMEONLY, "OSSetThreadPriority",          nullptr);
     REGISTER_HANDLER(SDKLIB_OSGetThreadPriority,          HANDLE_NAMEONLY, "OSGetThreadPriority",          nullptr);
@@ -770,11 +770,11 @@ uint32_t SystemAPI::Call(InterruptID id, Arguments args)
         uint32_t result = 0;
         switch (_handle->Status) {
         case HANDLE_IMPLEMENTED:
-            printf("[%05X] %s() called\n", _handle->Id, _handle->Name);
+            printf("[%05X] %s() called by thread [%i]\n", _handle->Id, _handle->Name, sExecutor->GetCurrentThreadId());
             result = _handle->Callback(&args);
             break;
         case HANDLE_NAMEONLY:
-            printf("[%05X] %s() UNHANDLED\n", _handle->Id, _handle->Name);
+            printf("[%05X] %s() UNHANDLED called by thread [%i]\n", _handle->Id, _handle->Name, sExecutor->GetCurrentThreadId());
             printf("    r0: %08X|%i\n    r1: %08X|%i\n    r2: %08X|%i\n    r3: %08X|%i\n    sp: %08X\n", args.r0, args.r0, args.r1,
                 args.r1, args.r2, args.r2, args.r3, args.r3, args.sp);
             break;

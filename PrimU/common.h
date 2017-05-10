@@ -36,6 +36,7 @@ enum MemoryRegion : VirtPtr
 
 
 #define PAGE_SIZE 0x1000
+#define THREAD_INS 10000
 
 #define __check(f, v, e) if (f != v) return e
 #define __CAST(t, v) reinterpret_cast<t>(v)

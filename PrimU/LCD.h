@@ -85,7 +85,7 @@ struct LCD // BLIGLCD
     void* leaveCriticalSecFunc;
     uint8_t unk5[92];
     LCD_MAGIC LcdMagic;
-    uint8_t buffer[320 * 240 * 3];
+    uint32_t buffer[320 * 240 * 3];
 
     LCD()// : LcdMagic(sMemoryManager->GetVirtualAddr(reinterpret_cast<RealPtr>(&bufPTR)))
     {
