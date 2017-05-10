@@ -70,7 +70,7 @@ typedef size_t uc_hook;
 // Unicorn package version
 #define UC_VERSION_MAJOR UC_API_MAJOR
 #define UC_VERSION_MINOR UC_API_MINOR
-#define UC_VERSION_EXTRA 0
+#define UC_VERSION_EXTRA 1
 
 
 /*
@@ -208,7 +208,7 @@ typedef enum uc_mem_type {
 typedef enum uc_hook_type {
     // Hook all interrupt/syscall events
     UC_HOOK_INTR = 1 << 0,
-    // Hook a particular instruction
+    // Hook a particular instruction - only a very small subset of instructions supported here
     UC_HOOK_INSN = 1 << 1,
     // Hook a range of code
     UC_HOOK_CODE = 1 << 2,
@@ -501,7 +501,6 @@ uc_err uc_emu_start(uc_engine *uc, uint64_t begin, uint64_t until, uint64_t time
 /*
  Stop emulation (which was started by uc_emu_start() API.
  This is typically called from callback functions registered via tracing APIs.
- NOTE: for now, this will stop the execution only after the current block.
 
  @uc: handle returned by uc_open()
 
@@ -642,7 +641,7 @@ uc_err uc_mem_protect(uc_engine *uc, uint64_t address, size_t size, uint32_t per
 
  @uc: handle returned by uc_open()
  @regions: pointer to an array of uc_mem_region struct. This is allocated by
-   Unicorn, and must be freed by user later
+   Unicorn, and must be freed by user later with uc_free()
  @count: pointer to number of struct uc_mem_region contained in @regions
 
  @return UC_ERR_OK on success, or other value on failure (refer to uc_err enum
@@ -660,6 +659,7 @@ uc_err uc_mem_regions(uc_engine *uc, uc_mem_region **regions, uint32_t *count);
  @uc: handle returned by uc_open()
  @context: pointer to a uc_engine*. This will be updated with the pointer to
    the new context on successful return of this function.
+   Later, this allocated memory must be freed with uc_free().
 
  @return UC_ERR_OK on success, or other value on failure (refer to uc_err enum
    for detailed error).
@@ -668,15 +668,16 @@ UNICORN_EXPORT
 uc_err uc_context_alloc(uc_engine *uc, uc_context **context);
 
 /*
- Free the resource allocated by uc_context_alloc.
+ Free the memory allocated by uc_context_alloc & uc_mem_regions.
 
- @context: handle returned by uc_context_alloc()
+ @mem: memory allocated by uc_context_alloc (returned in *context), or
+       by uc_mem_regions (returned in *regions)
 
  @return UC_ERR_OK on success, or other value on failure (refer to uc_err enum
    for detailed error).
 */
 UNICORN_EXPORT
-uc_err uc_context_free(uc_context *context);
+uc_err uc_free(void *mem);
 
 /*
  Save a copy of the internal CPU context.

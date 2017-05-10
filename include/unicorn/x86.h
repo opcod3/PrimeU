@@ -19,6 +19,13 @@ typedef struct uc_x86_mmr {
     uint32_t flags;     /* not used by GDTR and IDTR */
 } uc_x86_mmr;
 
+// Model-Specific Register structure, use this with UC_X86_REG_MSR (as the register ID) in
+// call to uc_reg_write/uc_reg_read() to manipulate MSRs.
+typedef struct uc_x86_msr {
+    uint32_t rid;   // MSR id
+    uint64_t value; // MSR value
+} uc_x86_msr;
+
 // Callback function for tracing SYSCALL/SYSENTER (for uc_hook_intr())
 // @user_data: user data passed to tracing APIs.
 typedef void (*uc_cb_insn_syscall_t)(struct uc_struct *uc, void *user_data);
@@ -77,6 +84,7 @@ typedef enum uc_x86_reg {
 	UC_X86_REG_R11W, UC_X86_REG_R12W, UC_X86_REG_R13W, UC_X86_REG_R14W, UC_X86_REG_R15W,
 	UC_X86_REG_IDTR, UC_X86_REG_GDTR, UC_X86_REG_LDTR, UC_X86_REG_TR, UC_X86_REG_FPCW,
 	UC_X86_REG_FPTAG,
+    UC_X86_REG_MSR, // Model-Specific Register
 
 	UC_X86_REG_ENDING		// <-- mark the end of the list of registers
 } uc_x86_reg;
