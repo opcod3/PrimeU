@@ -13,8 +13,9 @@ uint32_t prgrmIsRunning(Arguments* args);
 uint32_t _FindResourceW(Arguments* args);
 uint32_t _OpenFile(Arguments* args);
 uint32_t _LoadLibraryA(Arguments* args);
-uint32_t _FreeLibrary(Arguments* args);
-uint32_t OSInitCriticalSection(Arguments* args);
+uint32_t _FreeLibrary(Arguments* args); 
+uint32_t GetSysTime(Arguments* args);
+
 uint32_t OSSetEvent(Arguments* args);
 uint32_t OSCreateEvent(Arguments* args);
 uint32_t LCDOn(Arguments* args);
@@ -31,3 +32,9 @@ uint32_t __wfopen(Arguments* args);
 
 uint32_t OSCreateThread(Arguments* args);
 uint32_t OSSetThreadPriority(Arguments* args);
+uint32_t OSInitCriticalSection(Arguments* args);
+uint32_t OSEnterCriticalSection(Arguments* args);
+uint32_t OSLeaveCriticalSection(Arguments* args);
+uint32_t OSSleep(Arguments* args); 
+
+uint32_t _GetPrivateProfileString(Arguments* args);

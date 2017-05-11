@@ -85,11 +85,15 @@ ErrorCode MemoryManager::DyanmicAlloc(VirtPtr* addr, size_t size)
 
 ErrorCode MemoryManager::DynamicFree(VirtPtr addr)
 {
-    for (auto block : _blocks) {
-        if (block->ContainsVAddr(addr)) {
-            block->VirtualFree(addr);
-            if (block->CanFree());
-                // TODO: Free Block 
+    for (auto block = _blocks.begin(); block != _blocks.end(); ++block) {
+        if ((*block)->ContainsVAddr(addr)) {
+            (*block)->VirtualFree(addr);
+            if ((*block)->CanFree()) {
+                uc_mem_unmap(sExecutor->GetUcInstance(), (*block)->GetVAddr(), (*block)->GetSize());
+                delete (*block);
+                _blocks.erase(block);
+            }
+            return ERROR_OK;
         }
     }
 
@@ -113,7 +117,7 @@ ErrorCode MemoryManager::DynamicRealloc(VirtPtr* addr, size_t newsize)
                 memcpy(this->GetRealAddr(*addr), chunk.GetRAddr(), chunk.GetSize());
                 this->DynamicFree(oldAddr);
             }
-            
+            return ERROR_OK;
         }
     }
     return ERROR_MEM_ADDR_NOT_ALLOCATED;

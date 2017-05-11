@@ -6,6 +6,8 @@
 #include "interrupts.h"
 #include "InterruptHandler.h"
 #include "SystemAPI.h"
+#include "Thread.h"
+#include "ThreadHandler.h"
 
 #include <valarray>
 #include <chrono>
@@ -18,18 +20,19 @@ Executor* Executor::m_instance = nullptr;
 #define callAndcheckError(f) m_err = f; if (m_err != UC_ERR_OK) return false
 #define DEFINE_INTERRUPT(id, s, n, c) m_interrupts.insert(std::pair<InterruptID, InterruptHandle*>(id, new InterruptHandle(id, s, c, n)))
 
+void interrupt_hook(uc_engine *uc, uint64_t address, uint32_t size, void *user_data);
 void code_hook(uc_engine *uc, uint64_t address, uint32_t size, void *user_data)
 {
     static auto lastUpdate = std::chrono::high_resolution_clock::now();
 
     auto now = std::chrono::high_resolution_clock::now();
     std::chrono::milliseconds elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastUpdate);
-    if (elapsed.count() < sExecutor->GetCurrentThreadQuantum()) {
+    bool canrun = sThreadHandler->CanCurrentThreadRun();
+    if (elapsed.count() < sThreadHandler->GetCurrentThreadQuantum() && canrun) {
         return;
     }
 
-    lastUpdate = std::chrono::high_resolution_clock::now();
-    sExecutor->_currentThread->SaveState();
+    sThreadHandler->SaveCurrentThreadState();
     uc_emu_stop(sExecutor->GetUcInstance());
     printf(">>> Stopping at 0x%llX, instruction size = 0x%x\n", address, size);
 
@@ -46,10 +49,12 @@ void code_hook(uc_engine *uc, uint64_t address, uint32_t size, void *user_data)
            "    sp: %08X\n    pc: %08X\n    lr: %08X\n",
            r0, r0, r1, r1, r2, r2, r3, r3, r4, r4, r5, r5, r6, r6, r7, r7, r8, r8,
            r9, r9, r10, r10, r11, r11, r12, r12, sp, pc, lr);
-//    printf("PC inside interrupt: %08X", pc);
+
+
+    lastUpdate = std::chrono::high_resolution_clock::now();
 }
 
-bool Executor::initialize(Executable* exec)
+bool Executor::Initialize(Executable* exec)
 {
     if (!exec)
         return false;
@@ -64,69 +69,48 @@ bool Executor::initialize(Executable* exec)
 
     __check(exec->Load(), ERROR_OK, false);
 
-    callAndcheckError(uc_hook_add(m_uc, &m_interrupt_hook, UC_HOOK_INTR, interrupt_hook, this, 0, 1));
-
-    //MemoryBlock* stackBlock;
-    //__check(sMemoryManager->StaticAlloc(MEM_STACK, MEM_STACK_SIZE, &stackBlock), ERROR_OK, false);
-    //
-    //
-    //m_sp = stackBlock->GetVAddr() + stackBlock->GetSize();
-    //callAndcheckError(uc_reg_write(m_uc, UC_ARM_REG_SP, &m_sp));
-
     __check(sMemoryManager->StaticAlloc(LCD_REGISTER, LCD_REGISTER_SIZE), ERROR_OK, false);
 
-    uc_hook trace2;
-    uc_hook_add(m_uc, &trace2, UC_HOOK_CODE, code_hook, NULL, 1, 0);
+    __check(InitInterrupts(), true, false);
 
     return true;
 }
 
-void Executor::init_interrupts_()
+bool Executor::Cleanup()
 {
+    callAndcheckError(uc_hook_del(m_uc, m_interrupt_hook));
+    callAndcheckError(uc_hook_del(m_uc, _codeHook));
+    __check(sMemoryManager->StaticFree(LCD_REGISTER), ERROR_OK, false);
+    callAndcheckError(uc_close(m_uc));
 
 }
 
 
-void Executor::execute()
+bool Executor::InitInterrupts()
 {
-    new Thread(&_currentThread, m_exec->get_entry(), 0, THREAD_PRIORITY_NORMAL, MEM_STACK_SIZE);
-    _currentThread->LoadState();
+    callAndcheckError(uc_hook_add(m_uc, &m_interrupt_hook, UC_HOOK_INTR, interrupt_hook, this, 0, 1));
+    callAndcheckError(uc_hook_add(m_uc, &_codeHook, UC_HOOK_CODE, code_hook, NULL, 1, 0));
+    return true;
+}
 
 
-    int cnt = 0;
+void Executor::Execute()
+{
+    sThreadHandler->NewThread(m_exec->get_entry(), 0, THREAD_PRIORITY_NORMAL, MEM_STACK_SIZE);
+    sThreadHandler->LoadCurrentThreadState();
+
+
     m_err = UC_ERR_OK;
-    printf("Starting execution at 0x%X\n\n", _currentThread->GetCurrentPC());
+    printf("Starting execution at 0x%X\n\n", sThreadHandler->GetCurrentThreadPC());
     while (true)
     {
-        m_err = uc_emu_start(m_uc, _currentThread->GetCurrentPC(), 0, 0, 0);//THREAD_TIME, 0);
+        m_err = uc_emu_start(m_uc, sThreadHandler->GetCurrentThreadPC(), 0, 0, 0);
 
         if (m_err != UC_ERR_OK)
             break;
-
-        if (_currentThread != _currentThread->GetNextThread()) {
-            _currentThread = _currentThread->GetNextThread();
-            _currentThread->LoadState();
-            printf("switching threads\n");
-            cnt++;
-        }
+        sThreadHandler->SwitchThread();
     }
-    //    m_err = uc_emu_start(m_uc, PC0, 0, 0, ins);
 
-    //    uc_reg_read(m_uc, UC_ARM_REG_PC, &PC0);
-    //    uc_reg_read(m_uc, UC_ARM_REG_SP, &SP0);
-    //    //PC0;
-
-    //    printf("\nExecuted 0x%X instructions\n PC: %8X | SP: %8X\n", ins, PC0, SP0);
-
-    //    //_sleep(100);
-
-    //    //if ((SP0 == SP1) && (PC0 == PC1))
-    //    //{
-    //    //    printf("Not moving, broke loop\n");
-    //        //break;
-    //    //}
-    //}
-    //
     if (m_err != UC_ERR_OK) { 
 
         uint32_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, sp, pc, lr;
@@ -135,7 +119,7 @@ void Executor::execute()
             UC_ARM_REG_R7, UC_ARM_REG_R8, UC_ARM_REG_R9, UC_ARM_REG_R10, UC_ARM_REG_R11, UC_ARM_REG_R12, UC_ARM_REG_SP, UC_ARM_REG_LR, UC_ARM_REG_PC };
         uc_reg_read_batch(sExecutor->GetUcInstance(), regs, args, 16);
 
-        printf("Execution aborted on error: %s!\nThread: %i\nRegisters: \n", uc_strerror(m_err), sExecutor->GetCurrentThreadId());
+        printf("Execution aborted on error: %s!\nThread: %i\nRegisters: \n", uc_strerror(m_err), sThreadHandler->GetCurrentThreadId());
         printf("    r0: %08X|%i\n    r1: %08X|%i\n    r2: %08X|%i\n    r3: %08X|%i\n    r4: %08X|%i\n"\
                "    r5: %08X|%i\n    r6: %08X|%i\n    r7: %08X|%i\n    r8: %08X|%i\n    r9: %08X|%i\n"\
                "   r10: %08X|%i\n   r11: %08X|%i\n   r12: %08X|%i\n"\
@@ -171,100 +155,5 @@ void interrupt_hook(uc_engine *uc, uint64_t address, uint32_t size, void *user_d
     uc_reg_write(uc, UC_ARM_REG_R0, &return_value);
     uc_reg_write(uc, UC_ARM_REG_SP, &sp);
     uc_reg_write(uc, UC_ARM_REG_PC, &lr);
-
-    /*if (err != UC_ERR_OK)
-        printf("COULD NOT READ R0");
-    else*/
-    //    printf("+[0x%05X] Interrupt called\n    PC=%08X\n    LR=%08X\n", SVC, pc, LR);
-
-    //_sleep(1500);
-
 }
 
-int Executor::NewThread(VirtPtr start, uint32_t arg, uint8_t priority, size_t stackSize)
-{
-    Thread* newThread = new Thread(&_currentThread, start, arg, priority, stackSize);
-    return newThread->GetId();
-}
-
-int Executor::SetThreadPriority(int threadId, uint8_t priority)
-{
-    for (Thread* thread = nullptr; thread != _currentThread; thread = thread->GetNextThread()) {
-        if (thread == nullptr)
-            thread = _currentThread;
-
-        if (thread->GetId() == threadId) {
-            thread->SetPriority(priority);
-            return 1;
-        }
-    }
-    return NULL;
-}
-
-
-int Executor::GetCurrentThreadId() const
-{
-    return _currentThread->GetId();
-}
-
-uint32_t Executor::GetCurrentThreadQuantum() const
-{
-    return _currentThread->GetTimeQuantum();
-}
-
-
-
-int Thread::GenerateUniqueId()
-{
-    static int currentInt = -1;
-    currentInt++;
-    return currentInt;
-}
-
-void Thread::LoadState()
-{
-    _state->LoadState();
-}
-
-/* 
- * Do not call function outside of a callback!!
- *   as it may save an errant PC value because
- *   of a UC engine bug
- */
-void Thread::SaveState()
-{
-    _state->SaveState();
-}
-
-void ThreadState::LoadState()
-{
-    if (!_isNewThread) {
-        uc_context_restore(sExecutor->GetUcInstance(), _state);
-    }
-
-    uc_reg_write_batch(sExecutor->GetUcInstance(), reinterpret_cast<int*>(_regs), reinterpret_cast<void**>(_args), 16);
-}
-
-/*
-* Do not call function outside of a callback!!
-*   as it may save an errant PC value because
-*   of a UC engine bug
-*/
-void ThreadState::SaveState()
-{
-    uc_context_save(sExecutor->GetUcInstance(), _state);
-    uc_reg_read_batch(sExecutor->GetUcInstance(), reinterpret_cast<int*>(_regs), reinterpret_cast<void**>(_args), 16);
-
-    size_t thumb;
-    uc_query(sExecutor->GetUcInstance(), UC_QUERY_MODE, &thumb);
-    _pc += (thumb & UC_MODE_THUMB) ? 1 : 0;
-
-    if (_isNewThread)
-        _isNewThread = false;
-}
-
-
-uint32_t Thread::GetTimeQuantum()
-{
-    return _priority;
-}

@@ -176,6 +176,8 @@
     <ClInclude Include="MemoryManager.h" />
     <ClInclude Include="MemoryBlock.h" />
     <ClInclude Include="SystemAPI.h" />
+    <ClInclude Include="Thread.h" />
+    <ClInclude Include="ThreadHandler.h" />
     <ClInclude Include="vprintf.h" />
     <ClInclude Include="InterruptHandler.h" />
     <ClInclude Include="stdafx.h" />
@@ -193,6 +195,8 @@
     <ClCompile Include="system.cpp" />
     <ClCompile Include="MemoryBlock.cpp" />
     <ClCompile Include="SystemAPI.cpp" />
+    <ClCompile Include="Thread.cpp" />
+    <ClCompile Include="ThreadHandler.cpp" />
     <ClCompile Include="vprintf.cpp" />
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>

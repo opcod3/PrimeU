@@ -22,13 +22,14 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    if (!sExecutor->initialize(&exec))
+    if (!sExecutor->Initialize(&exec))
     {
-        printf("Initializing VM failed. Returned:%i", sExecutor->get_last_error());
+        printf("Initializing VM failed. Returned:%i", sExecutor->GetLastError());
         return 1;
     }
 
-    sExecutor->execute();
+    sExecutor->Execute();
+    sExecutor->Cleanup();
     getchar();
 
     return 0;

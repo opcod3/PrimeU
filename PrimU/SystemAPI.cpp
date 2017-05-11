@@ -1,4 +1,5 @@
 #include "SystemAPI.h"
+#include "ThreadHandler.h"
 
 #include "handlers.h"
 
@@ -16,7 +17,7 @@ SystemAPI::SystemAPI()
     REGISTER_HANDLER(SDKLIB_OSResumeThread,               HANDLE_NAMEONLY, "OSResumeThread",               nullptr);
     REGISTER_HANDLER(SDKLIB_OSWakeUpThread,               HANDLE_NAMEONLY, "OSWakeUpThread",               nullptr);
     REGISTER_HANDLER(SDKLIB_OSExitThread,                 HANDLE_NAMEONLY, "OSExitThread",                 nullptr);
-    REGISTER_HANDLER(SDKLIB_OSSleep,                      HANDLE_NAMEONLY, "OSSleep",                      nullptr);
+    REGISTER_HANDLER(SDKLIB_OSSleep,                      HANDLE_IMPLEMENTED, "OSSleep",                   OSSleep);
     REGISTER_HANDLER(SDKLIB_OSCreateSemaphore,            HANDLE_NAMEONLY, "OSCreateSemaphore",            nullptr);
     REGISTER_HANDLER(SDKLIB_OSWaitForSemaphore,           HANDLE_NAMEONLY, "OSWaitForSemaphore",           nullptr);
     REGISTER_HANDLER(SDKLIB_OSReleaseSemaphore,           HANDLE_NAMEONLY, "OSReleaseSemaphore",           nullptr);
@@ -27,8 +28,8 @@ SystemAPI::SystemAPI()
     REGISTER_HANDLER(SDKLIB_OSResetEvent,                 HANDLE_NAMEONLY, "OSResetEvent",                 nullptr);
     REGISTER_HANDLER(SDKLIB_OSCloseEvent,                 HANDLE_NAMEONLY, "OSCloseEvent",                 nullptr);
     REGISTER_HANDLER(SDKLIB_OSInitCriticalSection,        HANDLE_IMPLEMENTED, "OSInitCriticalSection",     OSInitCriticalSection);
-    REGISTER_HANDLER(SDKLIB_OSEnterCriticalSection,       HANDLE_NAMEONLY, "OSEnterCriticalSection",       nullptr);
-    REGISTER_HANDLER(SDKLIB_OSLeaveCriticalSection,       HANDLE_NAMEONLY, "OSLeaveCriticalSection",       nullptr);
+    REGISTER_HANDLER(SDKLIB_OSEnterCriticalSection,       HANDLE_IMPLEMENTED, "OSEnterCriticalSection",    OSEnterCriticalSection);
+    REGISTER_HANDLER(SDKLIB_OSLeaveCriticalSection,       HANDLE_IMPLEMENTED, "OSLeaveCriticalSection",    OSLeaveCriticalSection);
     REGISTER_HANDLER(SDKLIB_OSDeleteCriticalSection,      HANDLE_NAMEONLY, "OSDeleteCriticalSection",      nullptr);
     REGISTER_HANDLER(SDKLIB_OSSetLastError,               HANDLE_NAMEONLY, "OSSetLastError",               nullptr);
     REGISTER_HANDLER(SDKLIB_OSGetLastError,               HANDLE_NAMEONLY, "OSGetLastError",               nullptr);
@@ -173,7 +174,7 @@ SystemAPI::SystemAPI()
     REGISTER_HANDLER(SDKLIB_CopyFromClipBoard,            HANDLE_NAMEONLY, "CopyFromClipBoard",            nullptr);
     REGISTER_HANDLER(SDKLIB_ClearClipBoard,               HANDLE_NAMEONLY, "ClearClipBoard",               nullptr);
     REGISTER_HANDLER(SDKLIB_GetClipBoardTextLength,       HANDLE_NAMEONLY, "GetClipBoardTextLength",       nullptr);
-    REGISTER_HANDLER(SDKLIB_GetSysTime,                   HANDLE_NAMEONLY, "GetSysTime",                   nullptr);
+    REGISTER_HANDLER(SDKLIB_GetSysTime,                   HANDLE_IMPLEMENTED, "GetSysTime",                GetSysTime);
     REGISTER_HANDLER(SDKLIB_SetSysTime,                   HANDLE_NAMEONLY, "SetSysTime",                   nullptr);
     REGISTER_HANDLER(SDKLIB_PopupWaitingMsg,              HANDLE_NAMEONLY, "PopupWaitingMsg",              nullptr);
     REGISTER_HANDLER(SDKLIB_CloseWaitingMsg,              HANDLE_NAMEONLY, "CloseWaitingMsg",              nullptr);
@@ -281,7 +282,7 @@ SystemAPI::SystemAPI()
     REGISTER_HANDLER(SDKLIB__GetSystemDirectory,          HANDLE_NAMEONLY, "_GetSystemDirectory",          nullptr);
     REGISTER_HANDLER(SDKLIB__GetTempPath,                 HANDLE_NAMEONLY, "_GetTempPath",                 nullptr);
     REGISTER_HANDLER(SDKLIB__GetPrivateProfileInt,        HANDLE_NAMEONLY, "_GetPrivateProfileInt",        nullptr);
-    REGISTER_HANDLER(SDKLIB__GetPrivateProfileString,     HANDLE_NAMEONLY, "_GetPrivateProfileString",     nullptr);
+    REGISTER_HANDLER(SDKLIB__GetPrivateProfileString,     HANDLE_IMPLEMENTED, "_GetPrivateProfileString",  _GetPrivateProfileString);
     REGISTER_HANDLER(SDKLIB__WritePrivateProfileString,   HANDLE_NAMEONLY, "_WritePrivateProfileString",   nullptr);
     REGISTER_HANDLER(SDKLIB_GetTadCityNo,                 HANDLE_NAMEONLY, "GetTadCityNo",                 nullptr);
     REGISTER_HANDLER(SDKLIB_RunApplicationA,              HANDLE_NAMEONLY, "RunApplicationA",              nullptr);
@@ -770,13 +771,13 @@ uint32_t SystemAPI::Call(InterruptID id, Arguments args)
         uint32_t result = 0;
         switch (_handle->Status) {
         case HANDLE_IMPLEMENTED:
-            printf("[%05X] %s() called by thread [%i]\n", _handle->Id, _handle->Name, sExecutor->GetCurrentThreadId());
+            printf("[%05X] %s() called by thread [%i]\n", _handle->Id, _handle->Name, sThreadHandler->GetCurrentThreadId());
             result = _handle->Callback(&args);
             break;
         case HANDLE_NAMEONLY:
-            printf("[%05X] %s() UNHANDLED called by thread [%i]\n", _handle->Id, _handle->Name, sExecutor->GetCurrentThreadId());
-            printf("    r0: %08X|%i\n    r1: %08X|%i\n    r2: %08X|%i\n    r3: %08X|%i\n    sp: %08X\n", args.r0, args.r0, args.r1,
-                args.r1, args.r2, args.r2, args.r3, args.r3, args.sp);
+            printf("[%05X] %s() UNHANDLED called by thread [%i]\n", _handle->Id, _handle->Name, sThreadHandler->GetCurrentThreadId());
+            printf("    r0: %08X|%i\n    r1: %08X|%i\n    r2: %08X|%i\n    r3: %08X|%i\n    r4: %08X|%i\n    sp: %08X\n", args.r0, args.r0, args.r1,
+                args.r1, args.r2, args.r2, args.r3, args.r3, args.r4, args.r4, args.sp);
             break;
         case HANDLE_UNKOWN:
         default:

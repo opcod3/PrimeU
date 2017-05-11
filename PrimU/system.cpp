@@ -1,12 +1,14 @@
 
 
 #include "stdafx.h"
-#include "memory.h"
-#include <stdlib.h>
+#include <chrono>
+#include <ctime>
+
 
 #include "executor.h"
 #include "LCD.h"
 #include "InterruptHandler.h"
+#include "ThreadHandler.h"
 
 #define DUMPARGS printf("    r0: %08X|%i\n    r1: %08X|%i\n    r2: %08X|%i\n    r3: %08X|%i\n    r4: %08X|%i\n    sp: %08X\n", \
     args->r0, args->r0, args->r1, args->r1, args->r2,\
@@ -61,14 +63,55 @@ uint32_t _FreeLibrary(Arguments* args)
 
 uint32_t OSInitCriticalSection(Arguments* args)
 {
-    DUMPARGS;
-    return 0;
+    sThreadHandler->InitCriticalSection(__GET(CriticalSection*, args->r0));
+    return args->r0;
 }
+
+uint32_t OSEnterCriticalSection(Arguments* args)
+{
+    sThreadHandler->CurrentThreadEnterCriticalSection(__GET(CriticalSection*, args->r0));
+    return args->r0;
+}
+
+uint32_t OSLeaveCriticalSection(Arguments* args)
+{
+    sThreadHandler->CurrentThreadExitCriticalSection(__GET(CriticalSection*, args->r0));
+    return args->r0;
+}
+
+uint32_t OSSleep(Arguments* args)
+{
+    sThreadHandler->CurrentThreadSleep(args->r0);
+    return args->r0;
+}
+
+struct EVENT
+{
+    uint32_t unk0 = 0x201;
+    uint32_t unk1;
+    uint16_t unk2;
+    uint8_t unk3;
+    uint8_t unk4;
+    uint8_t unk5;
+    uint8_t unk6;
+    uint8_t unk7;
+    uint8_t unk8;
+    uint8_t unk9;
+    uint8_t unk10;
+    uint8_t unk11;
+};
 
 uint32_t OSCreateEvent(Arguments* args)
 {
-    DUMPARGS;
-    return 4415;
+    VirtPtr allocAddr;
+    sMemoryManager->DyanmicAlloc(&allocAddr, 0x14);
+    EVENT* ptr = __GET(EVENT*, allocAddr);
+    new (ptr) EVENT();
+
+    ptr->unk1 = args->r1;
+    ptr->unk2 = args->r0;
+
+    return allocAddr;
 }
 
 uint32_t OSSetEvent(Arguments* args)
@@ -85,22 +128,7 @@ uint32_t LCDOn(Arguments* args)
 
 uint32_t GetActiveLCD(Arguments* args)
 {
-    //DUMPARGS;
-    ErrorCode err = ERROR_OK;
-    VirtPtr lcd, virt_ptrBuf;
-    //new LCD(&virt_buffer, LCD_BUFFER);
-    if ((err = sMemoryManager->DyanmicAlloc(&lcd, sizeof(LCD))) != ERROR_OK)
-        __debugbreak();
-    LCD* realLCD = reinterpret_cast<LCD*>(sMemoryManager->GetRealAddr(lcd));
-    realLCD = new (realLCD) LCD();
-
-    if ((err = sMemoryManager->DyanmicAlloc(&virt_ptrBuf, 0x4)) != ERROR_OK)
-        __debugbreak();
-    *__GET(uint32_t*, virt_ptrBuf) = reinterpret_cast<uint32_t>(realLCD->LCDMagicPtr);
-    
-    //printf("    ret: %08X\n", virt_ptrBuf);
-
-    return virt_ptrBuf;
+    return sLCDHandler->GetActiveLCDPtr();
 }
 
 uint32_t lcalloc(Arguments* args)
@@ -174,12 +202,52 @@ uint32_t __wfopen(Arguments* args)
 uint32_t OSCreateThread(Arguments* args)
 {
     DUMPARGS;
-    return sExecutor->NewThread(args->r0, args->r4);
+    return sThreadHandler->NewThread(args->r0, args->r4);
 }
 
 uint32_t OSSetThreadPriority(Arguments* args)
 {
     DUMPARGS;
-    sExecutor->SetThreadPriority(args->r0, args->r1);
+    sThreadHandler->SetThreadPriority(args->r0, args->r1);
     return 0;
+}
+
+struct SystemTime
+{
+    uint16_t Year;
+    uint16_t Month;
+    uint16_t DayOfWeek;
+    uint16_t Day;
+    uint16_t Hour;
+    uint16_t Minute;
+    uint16_t Second;
+    uint16_t Milliseconds;
+};
+
+uint32_t GetSysTime(Arguments* args)
+{
+    SystemTime* sysTime = __GET(SystemTime*, args->r0);
+    auto now = std::chrono::system_clock::now();
+    auto now_c = std::chrono::system_clock::to_time_t(now);
+    tm *parts = std::localtime(&now_c);
+
+    sysTime->Year = parts->tm_yday;
+    sysTime->Month = parts->tm_mon;
+    sysTime->DayOfWeek = parts->tm_wday;
+    sysTime->Day = parts->tm_mday;
+    sysTime->Hour = parts->tm_hour;
+    sysTime->Minute = parts->tm_min;
+    sysTime->Second = parts->tm_sec;
+    auto totalMSec = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+    sysTime->Milliseconds = static_cast<uint16_t>(totalMSec % 1000);
+
+    return args->r0;
+}
+
+uint32_t _GetPrivateProfileString(Arguments* args)
+{
+    printf("    +appname: %s\n    +keyName: %s\n    +default: %s\n    +size: %i\n    +filename: %s",
+        __GET(char*, args->r0), __GET(char*, args->r1), __GET(char*, args->r2),
+            *__GET(int*, args->sp + 8), __GET(char*, *__GET(VirtPtr*, args->sp + 0xC)));
+    return args->r0;
 }

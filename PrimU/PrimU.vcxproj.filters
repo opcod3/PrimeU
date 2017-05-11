@@ -78,6 +78,12 @@
     <ClInclude Include="InterruptHandler.h">
       <Filter>Header Files\System</Filter>
     </ClInclude>
+    <ClInclude Include="Thread.h">
+      <Filter>Header Files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadHandler.h">
+      <Filter>Header Files\System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -110,10 +116,16 @@
     <ClCompile Include="MemoryBlock.cpp">
       <Filter>Source Files\Memory</Filter>
     </ClCompile>
-    <ClCompile Include="LCD.cpp">
-      <Filter>Header Files\Display</Filter>
-    </ClCompile>
     <ClCompile Include="SystemAPI.cpp">
+      <Filter>Source Files\System</Filter>
+    </ClCompile>
+    <ClCompile Include="LCD.cpp">
+      <Filter>Source Files\Display</Filter>
+    </ClCompile>
+    <ClCompile Include="Thread.cpp">
+      <Filter>Source Files\System</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadHandler.cpp">
       <Filter>Source Files\System</Filter>
     </ClCompile>
   </ItemGroup>
