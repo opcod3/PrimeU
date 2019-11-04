@@ -1,6 +1,8 @@
 PrimU
 =====
 
+## WARNING THIS IS OBSOLETE. SUPERCEDED BY https://github.com/Gigi1237/qemuPrime 
+
 PrimU is a prototype emulator for the HP Prime calculator based on [Unicorn Engine](https://github.com/unicorn-engine/unicorn).
 
 The program is currently so early in development that there are essentially  no features implemented. 
